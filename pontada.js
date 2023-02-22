@@ -5,15 +5,21 @@ export class Funcionario{
         this.entrada = '';                   // make Object.property for all later;
         this.horasAcumuladasNoMes = 0;
         this.registrosBackup = [];
+        this.inputId = '';
+        this.inputBtn = '';
     }
 
-    registraEntrada() {
-        console.log(`cheguei no registra entrada do ${this.id}`); 
-        if(!this.entrada) {
-            this.entrada = (Date.now() / 1000).toFixed();
-            return;
+    baterPonto(dadosDosFuncionarios) {
+        this.pegaInput();
+        this.clickPonto(dadosDosFuncionarios);
+    }
+
+    registraPonto() {
+        console.log(`cheguei no registra entrada do ${this.id}`);
+        if(this.entrada){
+            this.acumulaHoras();
         }
-        this.registraDiaria();
+        this.entrada = (Date.now() / 1000).toFixed();
     }
 
     resetHoras() {
@@ -22,7 +28,7 @@ export class Funcionario{
         this.horasAcumuladasNoMes = 0;
     }
 
-    registraDiaria() {
+    acumulaHoras() {
         const checkOut = (Date.now() / 1000).toFixed();
         const valor = Funcionario.timeStampParaHoras(this.entrada, checkOut);
         this.horasAcumuladasNoMes += valor;
@@ -34,6 +40,36 @@ export class Funcionario{
         this.registrosBackup.push({ id: this.id, checkIn: checkIn, checkOut: checkOut });
     }
 
+    pegaInput() {
+        const inputId = document.querySelector('.input-code');
+        const btn = document.querySelector('.btn-marca');      //Essa parte do código ta meio estranha, acho que da pra refatorar
+        this.inputId = inputId;
+        this.inputBtn = btn;
+    }
+    
+    clickPonto(dadosDosFuncionarios){
+        this.inputBtn.addEventListener('click', () => {
+            registraPorId(dadosDosFuncionarios);
+        });
+    }
+
+    registraPorId(dadosDosFuncionarios){
+        for(const pessoa of dadosDosFuncionarios){
+            const { chave } = pessoa;
+            if(this.inputId === chave.id) {
+                chave.registraPonto();
+            }
+        }
+    }
+
+    static timeStampParaHoras(entrada, saida) {
+        return ((saida - entrada) / 60 / 60).toFixed(2);
+    }
+
+
+
+
+
     amostraRegistro() {
         for(let registro of this.registrosBackup){
             const {checkIn, checkOut} = registro;
@@ -41,42 +77,17 @@ export class Funcionario{
         }
     }
 
-    estaLogado() {
-        if(!this.entrada) return 'Não está logado.';
+    fezCheckIn() {
+        if(!this.entrada) return 'Ainda não fez checkin.';
         const hora = new Date(this.entrada * 1000);
         return hora.toLocaleTimeString('pt-BR');
-
-        const seila = this.entrada ? 'Está logado.': 'Não está logado.';
-        return seila;
     }
 
-
-    static timeStampParaHoras(entrada, saida) {
-        return ((saida - entrada) / 60 / 60).toFixed(2);
+    pegaTexto(objFuncionario) {
+            const { chave } = objFuncionario;
+            return `${chave.nome} ${chave.id} ${chave.fezCheckIn()} ${chave.horasAcumuladasNoMes}`; 
     }
 
-    static pegaInput(registro) {
-        const inputId = document.querySelector('.input-code');
-        const btn = document.querySelector('.btn-marca');      //Essa parte do código ta meio cagada, acho que da pra refatorar
-        Funcionario.executaCode(inputId, btn, registro);
-    }
-
-
-    static pegaTexto(pessoa) {
-            const { chave } = pessoa;
-            return `${chave.nome} ${chave.id} ${chave.estaLogado()} ${chave.horasAcumuladasNoMes}`; 
-    }
-    static executaCode(codeInput, button, registro){
-        button.addEventListener('click', () => {
-            for(const pessoa of registro){
-                const { chave } = pessoa;
-                if(codeInput.value === chave.id){
-                chave.registraEntrada();
-                    }
-                }
-        })
-
-    }
 }
 
 export class Agenda{
@@ -111,8 +122,8 @@ export class Agenda{
 // janeiro.addTabela(f1);
 // janeiro.addTabela(f2);
 // console.log(f1);
-// f1.registraEntrada()
+// f1.baterPonto()
 // console.log(f1);
-// f1.registraEntrada()
+// f1.baterPonto()
 // console.log(f1);
 
