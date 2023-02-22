@@ -83,7 +83,7 @@ export class Funcionario{
         return hora.toLocaleTimeString('pt-BR');
     }
 
-    pegaTexto(objFuncionario) {
+    static pegaTexto(objFuncionario) {
             const { chave } = objFuncionario;
             return `${chave.nome} ${chave.id} ${chave.fezCheckIn()} ${chave.horasAcumuladasNoMes}`; 
     }
